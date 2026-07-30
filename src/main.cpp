@@ -59,7 +59,7 @@ int main() {
        std::cout << "Received " << bytesRead << " bytes: " << buffer << std::endl;
 
        // Create an empty response
-       char response[1] = { '\0' };
+       unsigned char response[12] = { 4, 210, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
        // Send response
        if (sendto(udpSocket, response, sizeof(response), 0, reinterpret_cast<struct sockaddr*>(&clientAddress), sizeof(clientAddress)) == -1) {
