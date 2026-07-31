@@ -60,7 +60,7 @@ int main() {
        std::cout << "Received " << bytesRead << " bytes: " << buffer << std::endl;
 
        // Create an empty response
-       std::vector<unsigned char> response = { 4, 210, 128, 0, 0, 1, 0, 0, 0, 0, 0, 0, 12, 'c', 'o', 'd', 'e', 'c', 'r', 'a', 'f', 't', 'e', 'r', 's', 2, 'i', 'o', '\x00', 0, 1, 0, 1 };
+       std::vector<unsigned char> response = { 4, 210, 128, 0, 0, 1, 0, 1, 0, 0, 0, 0, 12, 'c', 'o', 'd', 'e', 'c', 'r', 'a', 'f', 't', 'e', 'r', 's', 2, 'i', 'o', '\x00', 0, 1, 0, 1, 12, 'c', 'o', 'd', 'e', 'c', 'r', 'a', 'f', 't', 'e', 'r', 's', 2, 'i', 'o', '\x00', 0, 1, 0, 1, 0, 0, 0, 60, 0, 4, 8, 8, 8, 8, '\x00' };
 
        // Send response
        if (sendto(udpSocket, response.data(), response.size(), 0, reinterpret_cast<struct sockaddr*>(&clientAddress), sizeof(clientAddress)) == -1) {
