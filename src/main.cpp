@@ -5,6 +5,14 @@
 #include <unistd.h>
 #include <vector>
 
+std::vector<unsigned char> header_parser(char buffer[512]) {
+    std::vector<unsigned char> temp;
+    for (int i = 0; i < sizeof(buffer[512]); i++) {
+        temp.push_back(buffer[i]);
+    }
+    return temp
+}
+
 int main() {
     // Flush after every std::cout / std::cerr
     std::cout << std::unitbuf;
@@ -58,9 +66,12 @@ int main() {
 
        buffer[bytesRead] = '\0';
        std::cout << "Received " << bytesRead << " bytes: " << buffer << std::endl;
-
-       std::vector<unsigned char> response = { 4, 210, 128, 0, 0, 1, 0, 1, 0, 0, 0, 0, 12, 'c', 'o', 'd', 'e', 'c', 'r', 'a', 'f', 't', 'e', 'r', 's', 2, 'i', 'o', '\x00', 0, 1, 0, 1, 12, 'c', 'o', 'd', 'e', 'c', 'r', 'a', 'f', 't', 'e', 'r', 's', 2, 'i', 'o', '\x00', 0, 1, 0, 1, 0, 0, 0, 60, 0, 4, 8, 8, 8, 8, '\x00' };
-
+       
+       std::vector<unsigned char> response = header_parser(buffer);
+       std::vector<unsigned int> question_and_answer = { 12, 'c', 'o', 'd', 'e', 'c', 'r', 'a', 'f', 't', 'e', 'r', 's', 2, 'i', 'o', '\x00', 0, 1, 0, 1, 12, 'c', 'o', 'd', 'e', 'c', 'r', 'a', 'f', 't', 'e', 'r', 's', 2, 'i', 'o', '\x00', 0, 1, 0, 1, 0, 0, 0, 60, 0, 4, 8, 8, 8, 8, '\x00' };
+       for (int i = 0; i < question_and_answer.size(); i++) {
+           response.push_back(question_and_answer[i]);
+       }
        if (sendto(udpSocket, response.data(), response.size(), 0, reinterpret_cast<struct sockaddr*>(&clientAddress), sizeof(clientAddress)) == -1) {
            perror("Failed to send response");
        }
