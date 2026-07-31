@@ -7,11 +7,16 @@
 
 std::vector<unsigned char> header_parser(char buffer[512]) {
     std::vector<unsigned char> temp;
-    for (int i = 0; i < sizeof(buffer[512]); i++) {
+    for (int i = 0; i < 12; i++) {
         temp.push_back(buffer[i]);
     }
-    return temp
+    return temp;
 }
+
+// std::vector<unsigned char> question_parser(char buffer[512]) {
+//     std::vector<unsigned char> temp;
+    
+// }
 
 int main() {
     // Flush after every std::cout / std::cerr
@@ -68,10 +73,21 @@ int main() {
        std::cout << "Received " << bytesRead << " bytes: " << buffer << std::endl;
        
        std::vector<unsigned char> response = header_parser(buffer);
-       std::vector<unsigned int> question_and_answer = { 12, 'c', 'o', 'd', 'e', 'c', 'r', 'a', 'f', 't', 'e', 'r', 's', 2, 'i', 'o', '\x00', 0, 1, 0, 1, 12, 'c', 'o', 'd', 'e', 'c', 'r', 'a', 'f', 't', 'e', 'r', 's', 2, 'i', 'o', '\x00', 0, 1, 0, 1, 0, 0, 0, 60, 0, 4, 8, 8, 8, 8, '\x00' };
+       std::vector<unsigned char> question_and_answer = { 12, 'c', 'o', 'd', 'e', 'c', 'r', 'a', 'f', 't', 'e', 'r', 's', 2, 'i', 'o', '\x00', 0, 1, 0, 1, 12, 'c', 'o', 'd', 'e', 'c', 'r', 'a', 'f', 't', 'e', 'r', 's', 2, 'i', 'o', '\x00', 0, 1, 0, 1, 0, 0, 0, 60, 0, 4, 8, 8, 8, 8, '\x00' };
        for (int i = 0; i < question_and_answer.size(); i++) {
            response.push_back(question_and_answer[i]);
        }
+       // shifting QR while leaving all other fields untouched
+       response[2] |= 128;
+
+       // extracting the numerical value of OPCODE
+       int op_code = (response[2] & 120) >> 3;
+       if (op_code == 0) {
+           
+       } else {
+           response[3] = 4;
+       }
+       response[6] = 1;
        if (sendto(udpSocket, response.data(), response.size(), 0, reinterpret_cast<struct sockaddr*>(&clientAddress), sizeof(clientAddress)) == -1) {
            perror("Failed to send response");
        }
