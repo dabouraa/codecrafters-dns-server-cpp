@@ -13,10 +13,20 @@ std::vector<unsigned char> header_parser(char buffer[512]) {
     return temp;
 }
 
-// std::vector<unsigned char> question_parser(char buffer[512]) {
-//     std::vector<unsigned char> temp;
-    
-// }
+std::vector<unsigned char> question_answer_parser(char buffer[512], int bytesRead) {
+    std::vector<unsigned char> temp;
+    // question section
+    for (int i = 12; i < bytesRead; i++) {
+        temp.push_back(buffer[i]);
+    }
+    // answer section
+    int upper = temp.size();
+    for (int i = 0; i < upper; i++) {
+        temp.push_back(temp[i]);
+    }
+    temp.insert(temp.end(), { 0, 0, 0, 60, 0, 4, 8, 8, 8, 8 });
+    return temp;
+}
 
 int main() {
     // Flush after every std::cout / std::cerr
@@ -73,7 +83,7 @@ int main() {
        std::cout << "Received " << bytesRead << " bytes: " << buffer << std::endl;
        
        std::vector<unsigned char> response = header_parser(buffer);
-       std::vector<unsigned char> question_and_answer = { 12, 'c', 'o', 'd', 'e', 'c', 'r', 'a', 'f', 't', 'e', 'r', 's', 2, 'i', 'o', '\x00', 0, 1, 0, 1, 12, 'c', 'o', 'd', 'e', 'c', 'r', 'a', 'f', 't', 'e', 'r', 's', 2, 'i', 'o', '\x00', 0, 1, 0, 1, 0, 0, 0, 60, 0, 4, 8, 8, 8, 8, '\x00' };
+       std::vector<unsigned char> question_and_answer = question_answer_parser(buffer, bytesRead);
        for (int i = 0; i < question_and_answer.size(); i++) {
            response.push_back(question_and_answer[i]);
        }
