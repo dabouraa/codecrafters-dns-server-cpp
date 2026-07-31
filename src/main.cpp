@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <vector>
 
 int main() {
     // Flush after every std::cout / std::cerr
@@ -59,10 +60,10 @@ int main() {
        std::cout << "Received " << bytesRead << " bytes: " << buffer << std::endl;
 
        // Create an empty response
-       unsigned char response[12] = { 4, 210, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+       std::vector<unsigned char> response = { 4, 210, 128, 0, 0, 1, 0, 0, 0, 0, 0, 0, 12, 'c', 'o', 'd', 'e', 'c', 'r', 'a', 'f', 't', 'e', 'r', 's', 2, 'i', 'o', '\x00', 0, 1, 0, 1 };
 
        // Send response
-       if (sendto(udpSocket, response, sizeof(response), 0, reinterpret_cast<struct sockaddr*>(&clientAddress), sizeof(clientAddress)) == -1) {
+       if (sendto(udpSocket, response.data(), response.size(), 0, reinterpret_cast<struct sockaddr*>(&clientAddress), sizeof(clientAddress)) == -1) {
            perror("Failed to send response");
        }
    }
