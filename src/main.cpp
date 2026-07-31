@@ -49,7 +49,7 @@ int main() {
    socklen_t clientAddrLen = sizeof(clientAddress);
 
    while (true) {
-       // Receive data
+       // s
        bytesRead = recvfrom(udpSocket, buffer, sizeof(buffer), 0, reinterpret_cast<struct sockaddr*>(&clientAddress), &clientAddrLen);
        if (bytesRead == -1) {
            perror("Error receiving data");
