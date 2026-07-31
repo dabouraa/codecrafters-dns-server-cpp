@@ -87,7 +87,7 @@ int main() {
        } else {
            response[3] = 4;
        }
-       response[6] = 1;
+       response[7] = 1;
        if (sendto(udpSocket, response.data(), response.size(), 0, reinterpret_cast<struct sockaddr*>(&clientAddress), sizeof(clientAddress)) == -1) {
            perror("Failed to send response");
        }
