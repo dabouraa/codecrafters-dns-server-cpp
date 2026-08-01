@@ -13,19 +13,50 @@ std::vector<unsigned char> header_parser(char buffer[512]) {
     return temp;
 }
 
-std::vector<unsigned char> question_answer_parser(char buffer[512], int bytesRead) {
+std::pair<std::vector<unsigned char>, int> read_label(char buffer[512], int finalpos) {
     std::vector<unsigned char> temp;
-    // question section
-    for (int i = 12; i < bytesRead; i++) {
-        temp.push_back(buffer[i]);
+    
+    for (int i = finalpos;; i++) {
+        if (buffer[i] == 0) {
+            temp.push_back(buffer[i]);
+            finalpos = i;
+            break;
+        } else if (((buffer[i] & 192) >> 6) == 3) {
+            int offset = ((buffer[i] & 63) << 8) | buffer[i+1];
+            auto[temp2, finalpos2] = read_label(buffer, offset);
+            temp.insert(temp.end(), temp2.begin(), temp2.end());
+            finalpos = i + 1;
+            break;
+        } else {
+            temp.push_back(buffer[i]);
+        }
     }
-    // answer section
-    int upper = temp.size();
-    for (int i = 0; i < upper; i++) {
-        temp.push_back(temp[i]);
+    return {temp, finalpos};
+}
+
+std::vector<unsigned char> handle_answer(std::vector<unsigned char> temp) {
+    std::vector <unsigned char> answers = temp;
+    answers.insert(answers.end(), { 0, 0, 0, 60, 0, 4, 8, 8, 8, 8 });
+    return answers;
+}
+std::vector<unsigned char> question_answer_parser(char buffer[512], int bytesRead) { 
+    std::vector<unsigned char> temp_answers;
+    std::vector<std::vector<unsigned char>> questions;
+    int id;
+    int qdcount = buffer[5];
+    int pos = 12;
+    
+    for (int q = 0; q < qdcount; q++) {
+        auto [name, endpos] = read_label(buffer, pos);
+        for (int i = endpos + 1; i < endpos + 5; i++) { name.push_back(buffer[i]); }
+        questions.push_back(name);
+        pos = endpos + 5;
     }
-    temp.insert(temp.end(), { 0, 0, 0, 60, 0, 4, 8, 8, 8, 8 });
-    return temp;
+
+    std::vector<unsigned char> res;
+    for (auto &q : questions) { res.insert(res.end(), q.begin(), q.end()); }
+    for (auto &q : questions) { auto a = handle_answer(q); res.insert(res.end(), a.begin(), a.end()); }
+    return res;
 }
 
 int main() {
@@ -97,7 +128,8 @@ int main() {
        } else {
            response[3] = 4;
        }
-       response[7] = 1;
+       response[5] = buffer[5];
+       response[7] = buffer[5];
        if (sendto(udpSocket, response.data(), response.size(), 0, reinterpret_cast<struct sockaddr*>(&clientAddress), sizeof(clientAddress)) == -1) {
            perror("Failed to send response");
        }
